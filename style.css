@@ -1,4 +1,8 @@
 
+/* =========================
+   SCHOLARTRACK THEME
+   ========================= */
+
 * {
     box-sizing: border-box;
 }
@@ -17,153 +21,429 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: var(--background);
-    color: var(--text);
     font-size: 14px;
     line-height: 1.6;
-}
-
-/* Header */
-header {
-    background: var(--white);
+    background: var(--background);
     color: var(--text);
-    padding: 22px 5%;
-    border-bottom: 1px solid var(--border);
 }
 
-header h1 {
-    margin: 0;
-    color: var(--green);
-    font-size: 27px;
-    letter-spacing: -0.5px;
-}
-
-header div {
-    color: var(--muted);
-}
-
-header p {
-    margin: 8px 0 0;
-    font-size: 13px;
-}
-
-/* Navigation */
-nav {
-    background: var(--white);
-    padding: 12px 5%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 1px solid var(--border);
+button,
+input,
+select {
+    font: inherit;
 }
 
 button {
-    border: 1px solid var(--green);
-    border-radius: 6px;
-    padding: 9px 14px;
     cursor: pointer;
-    background: var(--green);
-    color: var(--white);
-    font: inherit;
-    font-weight: 600;
-    transition: background 0.15s ease;
 }
 
-button:hover {
+/* IMPORTANT: Hidden elements must stay hidden */
+.hidden,
+#loginPanel.hidden,
+#app.hidden {
+    display: none !important;
+}
+
+/* =========================
+   LOGIN PAGE
+   ========================= */
+
+#loginPanel {
+    display: block;
+    position: relative;
+    width: calc(100% - 32px);
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 32px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--green);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(25, 50, 35, 0.07);
+    text-align: left;
+}
+
+#loginPanel h2 {
+    display: block;
+    width: 100%;
+    margin: 0 0 8px;
+    color: var(--green);
+    font-size: 28px;
+    line-height: 1.3;
+    text-align: center;
+}
+
+#loginPanel > p {
+    display: block;
+    width: 100%;
+    margin: 0 0 28px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+#loginPanel form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+}
+
+#loginPanel form label {
+    display: block;
+    position: static;
+    width: 100%;
+    margin: 0 0 7px;
+    padding: 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: left;
+}
+
+#loginPanel form input {
+    display: block;
+    position: static;
+    float: none;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    margin: 0 0 20px;
+    padding: 11px 12px;
+    border: 1px solid #d8e0da;
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--text);
+    text-align: left;
+}
+
+#loginPanel form input:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.1);
+}
+
+#loginPanel form #loginButton {
+    display: block;
+    position: static;
+    float: none;
+    width: 100%;
+    min-height: 45px;
+    margin: 2px 0 0;
+    padding: 11px;
+    border: none;
+    border-radius: 7px;
+    background: var(--green);
+    color: var(--white);
+    font-weight: 600;
+    text-align: center;
+}
+
+#loginPanel form #loginButton:hover {
     background: var(--green-dark);
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: wait;
+#loginPanel #loginMessage {
+    display: block;
+    width: 100%;
+    margin: 12px 0 0;
+    padding: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    overflow-wrap: anywhere;
 }
 
-nav button {
+/* =========================
+   APP AND SIDEBAR
+   ========================= */
+
+#app {
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    width: 245px;
+    padding: 24px 16px;
+    overflow-y: auto;
+    background: var(--green-dark);
+    color: var(--white);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 10px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 21px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+}
+
+.brand p {
+    margin: 4px 0 0;
+    color: #c5d8cd;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.menu-label {
+    margin: 27px 10px 12px;
+    color: #a8c5b4;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.sidebar .nav-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-radius: 7px;
     background: transparent;
-    color: #53635a;
-    border-color: transparent;
+    color: #d9e8df;
+    text-align: left;
+    font-weight: 500;
 }
 
-nav button:hover {
-    background: var(--green-light);
-    color: var(--green);
+.sidebar .nav-button:hover,
+.sidebar .nav-button.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--white);
 }
 
-nav button.active {
-    background: var(--green-light);
-    color: var(--green);
-    border-color: #d5e9dc;
+.sidebar .nav-button.active {
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
-#refreshAllButton {
-    margin-left: auto;
+.nav-icon {
+    width: 22px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 17px;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.account-label {
+    margin: 0 10px 10px;
+    color: #a8c5b4;
+    font-size: 11px;
+}
+
+.account-info {
+    padding: 10px;
+    overflow-wrap: anywhere;
+}
+
+#userEmail {
+    color: var(--white);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+#userRole {
+    margin: 5px 0 14px;
+    color: #c5d8cd;
+    font-size: 12px;
 }
 
 #logoutButton {
-    background: white;
-    color: #a33b35;
-    border-color: #ecd8d6;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--white);
+    text-align: left;
 }
 
 #logoutButton:hover {
-    background: #fff1f0;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* Main content */
+/* =========================
+   MAIN CONTENT
+   ========================= */
+
+.main-area {
+    min-height: 100vh;
+    margin-left: 245px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 82px;
+    padding: 18px 30px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar > div {
+    min-width: 0;
+}
+
+.topbar h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+.topbar p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+#refreshAllButton {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 1px solid #cbdcd1;
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--green);
+}
+
+#refreshAllButton:hover {
+    background: var(--green-light);
+}
+
 main {
-    width: 92%;
-    max-width: 1200px;
-    margin: 28px auto;
-    min-height: 55vh;
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 28px 30px;
 }
 
 #pageHeading {
     margin: 0 0 20px;
-    color: var(--text);
     font-size: 24px;
 }
 
-/* Panels and cards */
-.panel,
-.card {
-    background: var(--white);
-    padding: 22px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(25, 50, 35, 0.025);
+.page > h2 {
+    margin: 0 0 20px;
+    font-size: 20px;
 }
 
-h2 {
-    color: var(--text);
-    font-size: 19px;
-    margin: 0 0 18px;
+/* =========================
+   PANELS AND CARDS
+   ========================= */
+
+.panel,
+.card {
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 24px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(25, 50, 35, 0.025);
 }
 
 h3 {
+    margin: 0 0 16px;
     font-size: 17px;
-    margin-top: 0;
 }
 
-/* Forms */
+/* =========================
+   DASHBOARD STATISTICS
+   ========================= */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.stats .card {
+    margin: 0;
+    padding: 20px;
+    border-top: 3px solid var(--green);
+}
+
+.stats .card p {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-number {
+    color: var(--green);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* =========================
+   GENERAL FORMS
+   ========================= */
+
 label {
     display: block;
-    font-weight: 600;
-    margin: 15px 0 6px;
+    margin: 18px 0 7px;
     color: #39483f;
+    font-weight: 600;
+    text-align: left;
 }
 
 input,
 select {
     display: block;
     width: 100%;
-    padding: 11px 12px;
+    min-width: 0;
+    min-height: 42px;
+    padding: 10px 12px;
     border: 1px solid #d8e0da;
     border-radius: 6px;
-    background: white;
+    background: var(--white);
     color: var(--text);
-    font: inherit;
     outline: none;
 }
 
@@ -182,67 +462,40 @@ input[type="hidden"] {
 }
 
 form button {
-    margin-top: 16px;
-    margin-right: 6px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Login page */
-#loginPanel {
-    width: min(420px, calc(100% - 32px));
-    margin: 8vh auto;
-    padding: 32px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: 4px solid var(--green);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(25, 50, 35, 0.08);
-}
-
-#loginPanel h2 {
-    margin: 0 0 6px;
-    color: var(--green);
-    font-size: 27px;
-    text-align: center;
-}
-
-#loginPanel > p {
-    margin: 0 0 24px;
-    color: var(--muted);
-    text-align: center;
-}
-
-#loginPanel label {
-    margin-top: 18px;
-}
-
-#loginPanel input {
-    min-height: 44px;
+    margin: 16px 6px 0 0;
+    padding: 10px 15px;
+    border: 1px solid var(--green);
     border-radius: 7px;
+    background: var(--green);
+    color: var(--white);
+    font-weight: 600;
 }
 
-#loginPanel form button {
-    display: block;
-    width: 100%;
-    min-height: 44px;
-    margin: 24px 0 0;
-    border-radius: 7px;
-}
-
-#loginPanel form button:hover {
+form button:hover {
     background: var(--green-dark);
 }
 
-#loginPanel .message {
-    margin-top: 12px;
-    text-align: center;
-    font-size: 13px;
+#cancelScholarshipForm {
+    border-color: var(--border);
+    background: var(--white);
+    color: var(--text);
 }
 
-/* Messages */
+#cancelScholarshipForm:hover {
+    background: var(--background);
+}
+
+#scholarshipFormContainer {
+    margin-top: 20px;
+    background: #fbfdfb;
+}
+
+.help {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
 .message {
     margin-top: 12px;
     overflow-wrap: anywhere;
@@ -256,43 +509,21 @@ form button {
     color: #b42318;
 }
 
-/* Dashboard statistics */
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-}
+/* =========================
+   TABLES
+   ========================= */
 
-.stats .card {
-    margin: 0;
-    padding: 20px;
-    border-top: 3px solid var(--green);
-}
-
-.stats .card p {
-    color: var(--muted);
-    margin: 0 0 8px;
-    font-size: 13px;
-}
-
-.stat-number {
-    color: var(--green);
-    font-size: 30px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-/* Tables */
 .table-wrapper {
     width: 100%;
+    margin-top: 10px;
     overflow-x: auto;
 }
 
 table {
     width: 100%;
+    margin-top: 12px;
     border-collapse: collapse;
-    margin-top: 16px;
-    background: white;
+    background: var(--white);
     font-size: 13px;
 }
 
@@ -302,13 +533,13 @@ td {
     border-bottom: 1px solid var(--border);
     text-align: left;
     vertical-align: middle;
+    line-height: 1.5;
 }
 
 th {
     background: #f5f8f6;
     color: #526158;
     font-size: 12px;
-    font-weight: 700;
     white-space: nowrap;
 }
 
@@ -317,12 +548,15 @@ tbody tr:hover {
 }
 
 td button {
-    margin: 2px;
+    margin: 3px;
     padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: var(--green);
+    color: var(--white);
     font-size: 12px;
 }
 
-/* Status labels */
 .status-badge {
     display: inline-block;
     padding: 4px 9px;
@@ -333,25 +567,18 @@ td button {
 }
 
 .status-compliant {
-    color: #176b45;
     background: #e2f4e8;
+    color: #176b45;
 }
 
 .status-deficiency {
-    color: #a12622;
     background: #fde9e7;
+    color: #a12622;
 }
 
 .status-pending {
-    color: #875b00;
     background: #fff4d5;
-}
-
-/* Helper text */
-.help {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 6px;
+    color: #875b00;
 }
 
 hr {
@@ -359,62 +586,132 @@ hr {
     border-top: 1px solid var(--border);
 }
 
-/* Scholarship form */
-#scholarshipFormContainer {
-    margin-top: 18px;
-    background: #fbfdfb;
-}
+/* =========================
+   FOOTER
+   ========================= */
 
-/* Footer */
 footer {
     padding: 24px;
-    text-align: center;
     color: var(--muted);
+    text-align: center;
     font-size: 12px;
-    border-top: 1px solid var(--border);
 }
 
-/* Responsive layout */
-@media (max-width: 800px) {
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+/* =========================
+   TABLET
+   ========================= */
+
+@media (max-width: 1100px) {
+    .sidebar {
+        width: 215px;
     }
 
-    #refreshAllButton {
-        margin-left: 0;
-    }
-}
-
-@media (max-width: 520px) {
-    header {
-        padding: 18px;
-    }
-
-    nav {
-        padding: 12px;
-    }
-
-    nav button {
-        padding: 8px 10px;
+    .main-area {
+        margin-left: 215px;
     }
 
     main {
-        width: 94%;
-        margin: 20px auto;
+        padding: 24px 20px;
+    }
+
+    .topbar {
+        padding: 17px 20px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 650px) {
+    #loginPanel {
+        margin: 35px auto;
+        padding: 25px 20px;
+    }
+
+    #loginPanel h2 {
+        font-size: 25px;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        padding: 16px;
+    }
+
+    .brand {
+        padding-bottom: 17px;
+    }
+
+    .menu-label {
+        margin-top: 18px;
+    }
+
+    .sidebar nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .sidebar .nav-button {
+        min-width: 0;
+        padding: 10px;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .sidebar-bottom {
+        margin-top: 18px;
+        padding-top: 14px;
+    }
+
+    .account-info {
+        padding: 5px 10px;
+    }
+
+    .main-area {
+        margin-left: 0;
+    }
+
+    .topbar {
+        min-height: auto;
+        padding: 16px;
+        align-items: flex-start;
+    }
+
+    .topbar h2 {
+        font-size: 19px;
+    }
+
+    .topbar p {
+        max-width: 230px;
+    }
+
+    #refreshAllButton {
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+    main {
+        padding: 18px 12px;
     }
 
     .panel,
     .card {
-        padding: 15px;
+        padding: 17px;
+        margin-bottom: 15px;
     }
 
-    #loginPanel {
-        width: calc(100% - 28px);
-        margin: 5vh auto;
-        padding: 24px 20px;
+    .page > h2 {
+        font-size: 19px;
     }
 
     .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
     }
 
@@ -422,11 +719,39 @@ footer {
         padding: 14px;
     }
 
+    .stats .card p {
+        font-size: 12px;
+    }
+
     .stat-number {
         font-size: 25px;
     }
 
-    #pageHeading {
-        font-size: 22px;
+    footer {
+        padding: 20px 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    #loginPanel {
+        padding: 22px 16px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #refreshAllButton {
+        width: 100%;
+    }
+
+    .sidebar .nav-button {
+        gap: 6px;
+        font-size: 11px;
     }
 }
