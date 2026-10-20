@@ -5,566 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScholarTrack</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --green: #176b45;
-            --dark-green: #12452f;
-            --light-green: #e8f4ed;
-            --background: #f6f8f7;
-            --border: #e2e8e4;
-            --text: #26352d;
-            --muted: #718078;
-            --white: #ffffff;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        button,
-        input,
-        select {
-            font: inherit;
-        }
-
-        button {
-            border: 0;
-            border-radius: 6px;
-            padding: 10px 14px;
-            cursor: pointer;
-            background: var(--green);
-            color: white;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background: var(--dark-green);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* LOGIN */
-
-        #loginPanel {
-            width: 92%;
-            max-width: 420px;
-            margin: 70px auto;
-            padding: 30px;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 5px 20px #00000008;
-        }
-
-        #loginPanel h2 {
-            color: var(--green);
-            margin-top: 0;
-        }
-
-        /* SIDEBAR */
-
-        #app {
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 245px;
-            background: var(--dark-green);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            padding: 25px 16px;
-            overflow-y: auto;
-            z-index: 10;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            padding: 0 10px 28px;
-            border-bottom: 1px solid #ffffff20;
-        }
-
-        .brand-icon {
-            width: 39px;
-            height: 39px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff18;
-            font-size: 22px;
-        }
-
-        .brand h1 {
-            margin: 0;
-            font-size: 20px;
-            letter-spacing: -0.4px;
-        }
-
-        .brand p {
-            margin: 2px 0 0;
-            color: #c5d8cd;
-            font-size: 11px;
-        }
-
-        .menu-label {
-            margin: 28px 10px 10px;
-            color: #a8c5b4;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 1.4px;
-        }
-
-        .sidebar nav {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .sidebar .nav-button {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 13px;
-            text-align: left;
-            color: #d9e8df;
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: 7px;
-            font-weight: 500;
-        }
-
-        .nav-icon {
-            width: 21px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .sidebar .nav-button:hover {
-            background: #ffffff12;
-            color: white;
-        }
-
-        .sidebar .nav-button.active {
-            background: #ffffff1b;
-            color: white;
-            border-color: #ffffff12;
-        }
-
-        .sidebar-bottom {
-            margin-top: auto;
-            padding-top: 20px;
-            border-top: 1px solid #ffffff20;
-        }
-
-        .account-label {
-            color: #a8c5b4;
-            margin: 0 10px 10px;
-            font-size: 11px;
-        }
-
-        .account-info {
-            padding: 10px;
-            overflow-wrap: anywhere;
-        }
-
-        #userEmail {
-            color: white;
-            font-weight: 600;
-        }
-
-        #userRole {
-            color: #c5d8cd;
-            font-size: 12px;
-            margin: 5px 0 12px;
-        }
-
-        #logoutButton {
-            width: 100%;
-            text-align: left;
-            background: transparent;
-            border: 1px solid #ffffff30;
-            color: white;
-        }
-
-        #logoutButton:hover {
-            background: #ffffff15;
-        }
-
-        /* MAIN CONTENT */
-
-        .main-area {
-            margin-left: 245px;
-            min-height: 100vh;
-        }
-
-        .topbar {
-            min-height: 76px;
-            padding: 17px 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            background: white;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .topbar h2 {
-            margin: 0;
-            font-size: 22px;
-        }
-
-        .topbar p {
-            margin: 3px 0 0;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        #refreshAllButton {
-            background: white;
-            color: var(--green);
-            border: 1px solid #cbdcd1;
-            white-space: nowrap;
-        }
-
-        #refreshAllButton:hover {
-            background: var(--light-green);
-        }
-
-        main {
-            max-width: 1450px;
-            padding: 28px 32px;
-            margin: 0 auto;
-        }
-
-        #pageHeading {
-            display: none;
-        }
-
-        .page > h2 {
-            margin-top: 0;
-            font-size: 19px;
-        }
-
-        .panel,
-        .card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 22px;
-            margin-bottom: 20px;
-        }
-
-        /* DASHBOARD CARDS */
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 16px;
-        }
-
-        .stats .card {
-            padding: 20px;
-            margin: 0;
-            border-top: 3px solid var(--green);
-        }
-
-        .stats .card p {
-            margin: 0 0 8px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .stat-number {
-            font-size: 30px;
-            line-height: 1.3;
-            font-weight: bold;
-            color: var(--green);
-        }
-
-        /* FORMS */
-
-        label {
-            display: block;
-            margin: 15px 0 6px;
-            font-weight: 600;
-            color: #39483f;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 11px 12px;
-            background: white;
-            color: var(--text);
-            border: 1px solid #d8e0da;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px #176b4515;
-        }
-
-        input[type="file"] {
-            cursor: pointer;
-        }
-
-        input[type="hidden"] {
-            display: none;
-        }
-
-        form button {
-            margin-top: 16px;
-            margin-right: 5px;
-        }
-
-        #cancelScholarshipForm {
-            background: white;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        #scholarshipFormContainer {
-            margin-top: 18px;
-            background: #fbfdfb;
-        }
-
-        .help {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .message {
-            overflow-wrap: anywhere;
-            margin-top: 12px;
-        }
-
-        .success {
-            color: var(--green);
-        }
-
-        .error {
-            color: #b42318;
-        }
-
-        /* TABLES */
-
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-            background: white;
-            font-size: 13px;
-        }
-
-        th,
-        td {
-            text-align: left;
-            vertical-align: middle;
-            padding: 13px 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background: #f5f8f6;
-            color: #526158;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        tbody tr:hover {
-            background: #fafcfb;
-        }
-
-        td button {
-            margin: 2px;
-            padding: 7px 10px;
-            font-size: 12px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 9px;
-            border-radius: 20px;
-            background: #f0f2f1;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-compliant {
-            color: #176b45;
-            background: #e2f4e8;
-        }
-
-        .status-deficiency {
-            color: #a12622;
-            background: #fde9e7;
-        }
-
-        .status-pending {
-            color: #875b00;
-            background: #fff4d5;
-        }
-
-        hr {
-            border: 0;
-            border-top: 1px solid var(--border);
-        }
-
-        footer {
-            padding: 22px;
-            color: var(--muted);
-            text-align: center;
-            font-size: 12px;
-        }
-
-        /* SMALL SCREENS */
-
-        @media (max-width: 1000px) {
-            .sidebar {
-                width: 210px;
-            }
-
-            .main-area {
-                margin-left: 210px;
-            }
-
-            main {
-                padding: 22px 20px;
-            }
-
-            .topbar {
-                padding: 16px 20px;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 650px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                padding: 15px;
-            }
-
-            .brand {
-                padding-bottom: 15px;
-            }
-
-            .menu-label {
-                margin-top: 16px;
-            }
-
-            .sidebar nav {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .sidebar .nav-button {
-                padding: 10px;
-                font-size: 12px;
-            }
-
-            .sidebar-bottom {
-                margin-top: 15px;
-                padding-top: 12px;
-            }
-
-            .account-info {
-                padding: 5px 10px;
-            }
-
-            .main-area {
-                margin-left: 0;
-            }
-
-            .topbar {
-                padding: 15px;
-            }
-
-            .topbar h2 {
-                font-size: 19px;
-            }
-
-            main {
-                padding: 18px 12px;
-            }
-
-            .panel,
-            .card {
-                padding: 15px;
-            }
-
-            .stats {
-                gap: 10px;
-            }
-
-            .stats .card {
-                padding: 14px;
-            }
-
-            .stat-number {
-                font-size: 25px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+    <!-- LOGIN PAGE -->
     <section id="loginPanel" class="panel">
         <h2>ScholarTrack</h2>
         <p>Scholarship Monitoring System</p>
 
         <form id="loginForm">
             <label for="email">Email</label>
-            <input type="email" id="email" required>
+            <input type="email" id="email" autocomplete="username" required>
 
             <label for="password">Password</label>
-            <input type="password" id="password" required>
+            <input type="password" id="password"
+                autocomplete="current-password" required>
 
             <button type="submit" id="loginButton">Login</button>
+
             <p id="loginMessage" class="message" aria-live="polite"></p>
         </form>
     </section>
 
+    <!-- MAIN APPLICATION -->
     <div id="app" class="hidden">
 
+        <!-- SIDEBAR -->
         <aside class="sidebar">
+
             <div class="brand">
                 <div class="brand-icon">🎓</div>
                 <div>
@@ -576,25 +46,29 @@
             <p class="menu-label">MAIN MENU</p>
 
             <nav>
-                <button type="button" class="nav-button active"
+                <button type="button"
+                    class="nav-button active"
                     data-page="dashboardPage">
                     <span class="nav-icon">▦</span>
                     Dashboard
                 </button>
 
-                <button type="button" class="nav-button"
+                <button type="button"
+                    class="nav-button"
                     data-page="scholarshipsPage">
                     <span class="nav-icon">🎓</span>
                     Scholarships
                 </button>
 
-                <button type="button" class="nav-button"
+                <button type="button"
+                    class="nav-button"
                     data-page="submissionsPage">
                     <span class="nav-icon">▤</span>
                     Semester Submissions
                 </button>
             </nav>
 
+            <!-- ACCOUNT -->
             <div class="sidebar-bottom">
                 <p class="account-label">ACCOUNT</p>
 
@@ -607,8 +81,10 @@
                     </button>
                 </div>
             </div>
+
         </aside>
 
+        <!-- MAIN AREA -->
         <div class="main-area">
 
             <header class="topbar">
@@ -623,15 +99,19 @@
             </header>
 
             <main>
+
                 <h2 id="pageHeading">Dashboard</h2>
 
-                <p id="globalMessage" class="message"
+                <p id="globalMessage"
+                    class="message"
                     aria-live="polite"></p>
 
+                <!-- DASHBOARD -->
                 <section id="dashboardPage" class="page panel">
                     <h2>Dashboard Overview</h2>
 
                     <div class="stats">
+
                         <div class="card">
                             <p>Total Scholarships</p>
                             <div id="total" class="stat-number">0</div>
@@ -651,10 +131,13 @@
                             <p>With Deficiency</p>
                             <div id="deficient" class="stat-number">0</div>
                         </div>
+
                     </div>
                 </section>
 
+                <!-- SCHOLARSHIPS -->
                 <section id="scholarshipsPage" class="page panel hidden">
+
                     <h2>Scholarship Records</h2>
 
                     <button type="button" id="toggleScholarshipForm">
@@ -662,9 +145,11 @@
                     </button>
 
                     <div id="scholarshipFormContainer" class="card hidden">
+
                         <h3 id="scholarshipFormTitle">Add Scholarship</h3>
 
                         <form id="scholarshipForm">
+
                             <input type="hidden" id="scholarshipId">
 
                             <label for="studentName">Scholar Name</label>
@@ -684,7 +169,10 @@
                                 <option value="With Deficiency">With Deficiency</option>
                             </select>
 
-                            <label for="studentUserId">Scholar Account User ID</label>
+                            <label for="studentUserId">
+                                Scholar Account User ID
+                            </label>
+
                             <input type="text" id="studentUserId"
                                 placeholder="Supabase user UUID">
 
@@ -698,8 +186,10 @@
                                 Cancel
                             </button>
 
-                            <p id="scholarshipFormMessage" class="message"
+                            <p id="scholarshipFormMessage"
+                                class="message"
                                 aria-live="polite"></p>
+
                         </form>
                     </div>
 
@@ -711,7 +201,8 @@
                         Refresh Scholarships
                     </button>
 
-                    <p id="scholarshipMessage" class="message"
+                    <p id="scholarshipMessage"
+                        class="message"
                         aria-live="polite"></p>
 
                     <div class="table-wrapper">
@@ -725,15 +216,20 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
+
                             <tbody id="scholarshipTable"></tbody>
                         </table>
                     </div>
+
                 </section>
 
+                <!-- SEMESTER SUBMISSIONS -->
                 <section id="submissionsPage" class="page panel hidden">
+
                     <h2>Semester Submissions</h2>
 
                     <form id="submissionForm">
+
                         <label for="submissionScholarship">Scholarship</label>
                         <select id="submissionScholarship" required>
                             <option value="">Select scholarship</option>
@@ -753,24 +249,29 @@
                             pattern="[0-9]{4}-[0-9]{4}" required>
 
                         <label for="grade">Grade / GWA</label>
-                        <input type="number" id="grade" min="1" max="5"
-                            step="0.01" placeholder="Example: 1.75" required>
+                        <input type="number" id="grade"
+                            min="1" max="5" step="0.01"
+                            placeholder="Example: 1.75" required>
 
                         <label for="requirementFile">
                             Upload Requirement (PDF, JPG, PNG)
                         </label>
+
                         <input type="file" id="requirementFile"
                             accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                             required>
 
                         <p class="help">
-                            Maximum file size: 5 MB. Accepted formats: PDF, JPG, JPEG, PNG.
+                            Maximum file size: 5 MB. Accepted formats:
+                            PDF, JPG, JPEG, PNG.
                         </p>
 
                         <button type="submit">Submit Record</button>
 
-                        <p id="submissionFormMessage" class="message"
+                        <p id="submissionFormMessage"
+                            class="message"
                             aria-live="polite"></p>
+
                     </form>
 
                     <hr style="margin:25px 0;">
@@ -793,7 +294,8 @@
                         Refresh Submissions
                     </button>
 
-                    <p id="submissionMessage" class="message"
+                    <p id="submissionMessage"
+                        class="message"
                         aria-live="polite"></p>
 
                     <div class="table-wrapper">
@@ -810,18 +312,23 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
+
                             <tbody id="semesterTable"></tbody>
                         </table>
                     </div>
+
                 </section>
+
             </main>
 
             <footer>
                 ScholarTrack · Scholarship Monitoring System
             </footer>
+
         </div>
     </div>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 
