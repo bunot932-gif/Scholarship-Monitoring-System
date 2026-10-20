@@ -1,402 +1,372 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScholarTrack</title>
-
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f3f7f4;
-            color: #26352d;
-        }
-
-        header {
-            background: #176b45;
-            color: white;
-            padding: 18px 24px;
-        }
-
-        header h1 { margin: 0 0 8px; }
-
-        nav {
-            background: #124f35;
-            padding: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        button {
-            border: 0;
-            border-radius: 5px;
-            padding: 10px 14px;
-            cursor: pointer;
-            background: #176b45;
-            color: white;
-        }
-
-        button:hover { background: #105437; }
-        button:disabled { opacity: 0.6; cursor: wait; }
-
-        nav button { background: #fff; color: #176b45; }
-        nav button.active { background: #ccebd8; }
-
-        main {
-            width: 94%;
-            max-width: 1150px;
-            margin: 24px auto;
-        }
-
-        .panel, .card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 9px;
-            box-shadow: 0 2px 8px #00000010;
-        }
-
-        h2 { color: #176b45; margin-top: 0; }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin: 12px 0 6px;
-        }
-
-        input, select {
-            display: block;
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #cbd5ce;
-            border-radius: 5px;
-            background: white;
-            font: inherit;
-        }
-
-        input[type="file"] { cursor: pointer; }
-
-        .hidden { display: none !important; }
-
-        .message {
-            margin-top: 12px;
-            overflow-wrap: anywhere;
-        }
-
-        .success { color: #176b45; }
-        .error { color: #b42318; }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 14px;
-        }
-
-        .stat-number {
-            font-size: 27px;
-            font-weight: bold;
-        }
-
-        .table-wrapper { overflow-x: auto; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background: white;
-        }
-
-        th, td {
-            padding: 11px;
-            border-bottom: 1px solid #e1e7e3;
-            text-align: left;
-        }
-
-        th { background: #eaf4ed; }
-
-        td button { margin: 3px; }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 8px;
-            border-radius: 12px;
-            background: #eee;
-            font-size: 12px;
-        }
-
-        .status-compliant {
-            color: #176b45;
-            background: #d8f3e2;
-        }
-
-        .status-deficiency {
-            color: #a12622;
-            background: #ffe0dd;
-        }
-
-        .status-pending {
-            color: #875b00;
-            background: #fff0c2;
-        }
-
-        .help {
-            color: #59665e;
-            font-size: 14px;
-        }
-
-        footer {
-            padding: 20px;
-            text-align: center;
-            color: #66736b;
-        }
-
-        @media (max-width: 600px) {
-            main { width: 96%; }
-            .panel, .card { padding: 14px; }
-        }
-    </style>
-</head>
-
-<body>
-    <header>
-        <h1>ScholarTrack</h1>
-        <div>Scholarship Monitoring System</div>
-        <p>
-            Signed in as: <span id="userEmail">Not signed in</span>
-        </p>
-        <p id="userRole">Role: Scholar</p>
-    </header>
-
-    <section id="loginPanel" class="panel" style="max-width:450px;margin:30px auto;">
-        <h2>Login</h2>
-
-        <form id="loginForm">
-            <label for="email">Email</label>
-            <input type="email" id="email" required>
-
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
-
-            <button type="submit" id="loginButton">Login</button>
-            <p id="loginMessage" class="message" aria-live="polite"></p>
-        </form>
-    </section>
-
-    <div id="app" class="hidden">
-        <nav>
-            <button type="button" class="nav-button active"
-                data-page="dashboardPage">Dashboard</button>
-
-            <button type="button" class="nav-button"
-                data-page="scholarshipsPage">Scholarships</button>
-
-            <button type="button" class="nav-button"
-                data-page="submissionsPage">Semester Submissions</button>
-
-            <button type="button" id="refreshAllButton">Refresh All</button>
-            <button type="button" id="logoutButton">Logout</button>
-        </nav>
-
-        <main>
-            <h2 id="pageHeading">Dashboard</h2>
-            <p id="globalMessage" class="message" aria-live="polite"></p>
-
-            <section id="dashboardPage" class="page panel">
-                <h2>Dashboard</h2>
-
-                <div class="stats">
-                    <div class="card">
-                        <p>Total Scholarships</p>
-                        <div id="total" class="stat-number">0</div>
-                    </div>
-
-                    <div class="card">
-                        <p>Pending</p>
-                        <div id="pending" class="stat-number">0</div>
-                    </div>
-
-                    <div class="card">
-                        <p>Compliant</p>
-                        <div id="compliant" class="stat-number">0</div>
-                    </div>
-
-                    <div class="card">
-                        <p>With Deficiency</p>
-                        <div id="deficient" class="stat-number">0</div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="scholarshipsPage" class="page panel hidden">
-                <h2>Scholarship Records</h2>
-
-                <button type="button" id="toggleScholarshipForm">
-                    Add Scholarship
-                </button>
-
-                <div id="scholarshipFormContainer" class="card hidden">
-                    <h3 id="scholarshipFormTitle">Add Scholarship</h3>
-
-                    <form id="scholarshipForm">
-                        <input type="hidden" id="scholarshipId">
-
-                        <label for="studentName">Scholar Name</label>
-                        <input type="text" id="studentName" required>
-
-                        <label for="scholarshipName">Scholarship Name</label>
-                        <input type="text" id="scholarshipName" required>
-
-                        <label for="scholarshipAmount">Amount (PHP)</label>
-                        <input type="number" id="scholarshipAmount"
-                            min="0" step="0.01" required>
-
-                        <label for="scholarshipStatus">Status</label>
-                        <select id="scholarshipStatus" required>
-                            <option value="Pending">Pending</option>
-                            <option value="Compliant">Compliant</option>
-                            <option value="With Deficiency">With Deficiency</option>
-                        </select>
-
-                        <label for="studentUserId">Scholar Account User ID</label>
-                        <input type="text" id="studentUserId"
-                            placeholder="Supabase user UUID">
-
-                        <p class="help">
-                            Enter the Scholar's account UUID to link the scholarship.
-                        </p>
-
-                        <button type="submit">Save Scholarship</button>
-                        <button type="button" id="cancelScholarshipForm">
-                            Cancel
-                        </button>
-
-                        <p id="scholarshipFormMessage" class="message"
-                            aria-live="polite"></p>
-                    </form>
-                </div>
-
-                <label for="scholarshipSearch">Search Scholarships</label>
-                <input type="search" id="scholarshipSearch"
-                    placeholder="Search scholar or scholarship">
-
-                <button type="button" id="refreshScholarships">
-                    Refresh Scholarships
-                </button>
-
-                <p id="scholarshipMessage" class="message"
-                    aria-live="polite"></p>
-
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Scholar</th>
-                                <th>Scholarship</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scholarshipTable"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="submissionsPage" class="page panel hidden">
-                <h2>Semester Submissions</h2>
-
-                <form id="submissionForm">
-                    <label for="submissionScholarship">Scholarship</label>
-                    <select id="submissionScholarship" required>
-                        <option value="">Select scholarship</option>
-                    </select>
-
-                    <label for="semester">Semester</label>
-                    <select id="semester" required>
-                        <option value="">Select semester</option>
-                        <option value="1st Semester">1st Semester</option>
-                        <option value="2nd Semester">2nd Semester</option>
-                        <option value="Summer">Summer</option>
-                    </select>
-
-                    <label for="academicYear">Academic Year</label>
-                    <input type="text" id="academicYear"
-                        placeholder="2026-2027"
-                        pattern="[0-9]{4}-[0-9]{4}" required>
-
-                    <label for="grade">Grade / GWA</label>
-                    <input type="number" id="grade" min="1" max="5"
-                        step="0.01" placeholder="Example: 1.75" required>
-
-                    <label for="requirementFile">
-                        Upload Requirement (PDF, JPG, PNG)
-                    </label>
-                    <input type="file" id="requirementFile"
-                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                        required>
-
-                    <p class="help">
-                        Maximum file size: 5 MB. Accepted formats: PDF, JPG, JPEG, PNG.
-                    </p>
-
-                    <button type="submit">Submit Record</button>
-
-                    <p id="submissionFormMessage" class="message"
-                        aria-live="polite"></p>
-                </form>
-
-                <hr style="margin:25px 0;border:0;border-top:1px solid #ddd;">
-
-                <h2>Submission Records</h2>
-
-                <label for="submissionSearch">Search Submissions</label>
-                <input type="search" id="submissionSearch"
-                    placeholder="Search records">
-
-                <label for="submissionStatusFilter">Filter by Status</label>
-                <select id="submissionStatusFilter">
-                    <option value="">All Statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Verified">Verified</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-
-                <button type="button" id="refreshSubmissions">
-                    Refresh Submissions
-                </button>
-
-                <p id="submissionMessage" class="message"
-                    aria-live="polite"></p>
-
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Scholar</th>
-                                <th>Scholarship</th>
-                                <th>Semester</th>
-                                <th>Academic Year</th>
-                                <th>Grade / GWA</th>
-                                <th>Status</th>
-                                <th>Renewal</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="semesterTable"></tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <footer>ScholarTrack Scholarship Monitoring System</footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --green: #176b45;
+    --green-dark: #105437;
+    --green-light: #e8f4ed;
+    --background: #f7f9f8;
+    --border: #e3e9e5;
+    --text: #26352d;
+    --muted: #718078;
+    --white: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+header {
+    background: var(--white);
+    color: var(--text);
+    padding: 22px 5%;
+    border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+    margin: 0;
+    color: var(--green);
+    font-size: 27px;
+    letter-spacing: -0.5px;
+}
+
+header div {
+    color: var(--muted);
+}
+
+header p {
+    margin: 8px 0 0;
+    font-size: 13px;
+}
+
+nav {
+    background: var(--white);
+    padding: 12px 5%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+button {
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    padding: 9px 14px;
+    cursor: pointer;
+    background: var(--green);
+    color: var(--white);
+    font: inherit;
+    font-weight: 600;
+    transition: background 0.15s ease;
+}
+
+button:hover {
+    background: var(--green-dark);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+nav button {
+    background: transparent;
+    color: #53635a;
+    border-color: transparent;
+}
+
+nav button:hover {
+    background: var(--green-light);
+    color: var(--green);
+}
+
+nav button.active {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: #d5e9dc;
+}
+
+#refreshAllButton {
+    margin-left: auto;
+}
+
+#logoutButton {
+    background: white;
+    color: #a33b35;
+    border-color: #ecd8d6;
+}
+
+#logoutButton:hover {
+    background: #fff1f0;
+}
+
+main {
+    width: 92%;
+    max-width: 1200px;
+    margin: 28px auto;
+    min-height: 55vh;
+}
+
+#pageHeading {
+    margin: 0 0 20px;
+    color: var(--text);
+    font-size: 24px;
+}
+
+.panel,
+.card {
+    background: var(--white);
+    padding: 22px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(25, 50, 35, 0.025);
+}
+
+h2 {
+    color: var(--text);
+    font-size: 19px;
+    margin: 0 0 18px;
+}
+
+h3 {
+    font-size: 17px;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin: 15px 0 6px;
+    color: #39483f;
+}
+
+input,
+select {
+    display: block;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d8e0da;
+    border-radius: 6px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(23, 107, 69, 0.09);
+}
+
+input[type="file"] {
+    cursor: pointer;
+}
+
+input[type="hidden"] {
+    display: none;
+}
+
+form button {
+    margin-top: 16px;
+    margin-right: 6px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.message {
+    margin-top: 12px;
+    overflow-wrap: anywhere;
+}
+
+.success {
+    color: var(--green);
+}
+
+.error {
+    color: #b42318;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.stats .card {
+    margin: 0;
+    padding: 20px;
+    border-top: 3px solid var(--green);
+}
+
+.stats .card p {
+    color: var(--muted);
+    margin: 0 0 8px;
+    font-size: 13px;
+}
+
+.stat-number {
+    color: var(--green);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    background: white;
+    font-size: 13px;
+}
+
+th,
+td {
+    padding: 13px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #f5f8f6;
+    color: #526158;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+tbody tr:hover {
+    background: #fafcfb;
+}
+
+td button {
+    margin: 2px;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #f0f2f1;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-compliant {
+    color: #176b45;
+    background: #e2f4e8;
+}
+
+.status-deficiency {
+    color: #a12622;
+    background: #fde9e7;
+}
+
+.status-pending {
+    color: #875b00;
+    background: #fff4d5;
+}
+
+.help {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+#loginPanel {
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(25, 50, 35, 0.04);
+}
+
+#loginPanel h2 {
+    color: var(--green);
+}
+
+#scholarshipFormContainer {
+    margin-top: 18px;
+    background: #fbfdfb;
+}
+
+footer {
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 800px) {
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #refreshAllButton {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 520px) {
+    header {
+        padding: 18px;
+    }
+
+    nav {
+        padding: 12px;
+    }
+
+    nav button {
+        padding: 8px 10px;
+    }
+
+    main {
+        width: 94%;
+        margin: 20px auto;
+    }
+
+    .panel,
+    .card {
+        padding: 15px;
+    }
+
+    .stats {
+        gap: 10px;
+    }
+
+    .stats .card {
+        padding: 14px;
+    }
+
+    .stat-number {
+        font-size: 25px;
+    }
+
+    #pageHeading {
+        font-size: 22px;
+    }
+}
