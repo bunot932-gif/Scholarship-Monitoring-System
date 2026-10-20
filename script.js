@@ -4,6 +4,10 @@ const SUPABASE_KEY = "sb_publishable_dWXwENqpokifN2DCBX4y-g_BCv7W9CI";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const BUCKET_NAME = "scholarship-requirements";
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+
 const $ = (id) => document.getElementById(id);
 
 let currentUser = null;
@@ -18,9 +22,7 @@ function showMessage(id, message, type = "") {
     element.textContent = message;
     element.className = "message";
 
-    if (type) {
-        element.classList.add(type);
-    }
+    if (type) element.classList.add(type);
 }
 
 function escapeHTML(value) {
@@ -47,18 +49,11 @@ function money(value) {
 function statusClass(status) {
     const value = String(status || "").toLowerCase();
 
-    if (
-        value === "compliant" ||
-        value === "verified" ||
-        value === "approved"
-    ) {
+    if (["compliant", "verified", "approved"].includes(value)) {
         return "status-compliant";
     }
 
-    if (
-        value === "with deficiency" ||
-        value === "rejected"
-    ) {
+    if (["with deficiency", "rejected"].includes(value)) {
         return "status-deficiency";
     }
 
@@ -70,11 +65,15 @@ function statusBadge(status) {
 }
 
 function isStaff() {
-    return currentRole === "staff" || currentRole === "admin";
+    return currentRole === "staff";
 }
 
 function isAdmin() {
-    return currentRole === "admin";
+    return false;
+}
+
+function getRoleLabel(role) {
+    return role === "staff" ? "Staff" : "Scholar";
 }
 
 function showLogin() {
@@ -99,10 +98,7 @@ function showPage(pageId) {
     });
 
     const selectedPage = $(pageId);
-
-    if (selectedPage) {
-        selectedPage.classList.remove("hidden");
-    }
+    if (selectedPage) selectedPage.classList.remove("hidden");
 
     document.querySelectorAll(".nav-button").forEach((button) => {
         button.classList.toggle("active", button.dataset.page === pageId);
@@ -129,13 +125,9 @@ async function getUserRole(user) {
         return { role: "student", name: user.email || "User" };
     }
 
-    if (!data) {
-        return { role: "student", name: user.email || "User" };
-    }
-
     return {
-        role: data.role || "student",
-        name: data.full_name || user.email || "User"
+        role: data?.role || "student",
+        name: data?.full_name || user.email || "User"
     };
 }
 
@@ -146,7 +138,7 @@ async function enterApp(user) {
     currentRole = profile.role;
 
     $("userEmail").textContent = user.email || profile.name;
-    $("userRole").textContent = `Role: ${currentRole}`;
+    $("userRole").textContent = `Role: ${getRoleLabel(currentRole)}`;
 
     $("toggleScholarshipForm").classList.toggle("hidden", !isStaff());
     $("scholarshipFormContainer").classList.add("hidden");
@@ -156,9 +148,9 @@ async function enterApp(user) {
 
     showMessage(
         "globalMessage",
-        currentRole === "student"
-            ? "You are signed in as a student. Only records permitted by your account can be displayed."
-            : `Welcome, ${profile.name}!`,
+        isStaff()
+            ? `Welcome, ${profile.name}!`
+            : "Welcome, Scholar! You can view your own scholarship records and submit semester requirements.",
         "success"
     );
 
@@ -183,17 +175,15 @@ async function checkSession() {
 async function login(event) {
     event.preventDefault();
 
-    const email = $("email").value.trim();
-    const password = $("password").value;
     const button = $("loginButton");
-
     button.disabled = true;
     button.textContent = "Signing in...";
+
     showMessage("loginMessage", "");
 
     const { data, error } = await db.auth.signInWithPassword({
-        email,
-        password
+        email: $("email").value.trim(),
+        password: $("password").value
     });
 
     button.disabled = false;
@@ -221,7 +211,6 @@ async function logout() {
     submissions = [];
 
     $("loginForm").reset();
-
     showLogin();
     showMessage("loginMessage", "You have signed out.", "success");
 }
@@ -229,11 +218,7 @@ async function logout() {
 async function refreshAll() {
     if (!currentUser) return;
 
-    await Promise.all([
-        loadScholarships(),
-        loadSubmissions()
-    ]);
-
+    await Promise.all([loadScholarships(), loadSubmissions()]);
     updateDashboard();
 }
 
@@ -263,38 +248,36 @@ async function loadScholarships() {
 function renderScholarships() {
     const search = $("scholarshipSearch").value.toLowerCase();
 
-    const filtered = scholarships.filter((item) => {
-        return (
-            String(item.student_name || "").toLowerCase().includes(search) ||
-            String(item.scholarship_name || "").toLowerCase().includes(search) ||
-            String(item.status || "").toLowerCase().includes(search)
-        );
-    });
+    const filtered = scholarships.filter((item) =>
+        String(item.student_name || "").toLowerCase().includes(search) ||
+        String(item.scholarship_name || "").toLowerCase().includes(search) ||
+        String(item.status || "").toLowerCase().includes(search)
+    );
 
-    if (filtered.length === 0) {
+    if (!filtered.length) {
         $("scholarshipTable").innerHTML =
             `<tr><td colspan="5">No scholarship records found.</td></tr>`;
         return;
     }
 
     $("scholarshipTable").innerHTML = filtered.map((item) => {
-        let actions = "";
+        let actions = "View only";
 
         if (isStaff()) {
-            actions += `
+            actions = `
                 <button class="action-button edit-button"
                     data-action="edit-scholarship"
-                    data-id="${item.id}">Edit</button>`;
+                    data-id="${escapeHTML(item.id)}">Edit</button>
+            `;
         }
 
         if (isAdmin()) {
             actions += `
                 <button class="action-button delete-button"
                     data-action="delete-scholarship"
-                    data-id="${item.id}">Delete</button>`;
+                    data-id="${escapeHTML(item.id)}">Delete</button>
+            `;
         }
-
-        if (!actions) actions = "View only";
 
         return `
             <tr>
@@ -303,7 +286,8 @@ function renderScholarships() {
                 <td>${money(item.amount)}</td>
                 <td>${statusBadge(item.status)}</td>
                 <td>${actions}</td>
-            </tr>`;
+            </tr>
+        `;
     }).join("");
 }
 
@@ -350,11 +334,7 @@ function resetScholarshipForm() {
 
 function openScholarshipForm(item = null) {
     if (!isStaff()) {
-        showMessage(
-            "scholarshipMessage",
-            "Only staff and admins can add or edit scholarship records.",
-            "error"
-        );
+        showMessage("scholarshipMessage", "Only Staff can add or edit records.", "error");
         return;
     }
 
@@ -397,18 +377,9 @@ async function saveScholarship(event) {
 
     showMessage("scholarshipFormMessage", "Saving...");
 
-    let result;
-
-    if (id) {
-        result = await db
-            .from("scholarships")
-            .update(record)
-            .eq("id", id);
-    } else {
-        result = await db
-            .from("scholarships")
-            .insert(record);
-    }
+    const result = id
+        ? await db.from("scholarships").update(record).eq("id", id)
+        : await db.from("scholarships").insert(record);
 
     if (result.error) {
         showMessage("scholarshipFormMessage", result.error.message, "error");
@@ -423,26 +394,45 @@ async function saveScholarship(event) {
 }
 
 async function deleteScholarship(id) {
-    if (!isAdmin()) {
-        showMessage("scholarshipMessage", "Only admins can delete records.", "error");
-        return;
+    showMessage("scholarshipMessage", "Scholarship deletion is disabled.", "error");
+}
+
+// Validate the selected document before uploading.
+function validateRequirementFile(file) {
+    if (!file) {
+        return "Please choose a requirement file.";
     }
 
-    const confirmed = confirm("Are you sure you want to delete this scholarship?");
-    if (!confirmed) return;
+    if (file.size > MAX_FILE_SIZE) {
+        return "The file is too large. Maximum size is 5 MB.";
+    }
 
-    const { error } = await db
-        .from("scholarships")
-        .delete()
-        .eq("id", id);
+    if (!ALLOWED_TYPES.includes(file.type)) {
+        return "Invalid file type. Please choose a PDF, JPG, or PNG file.";
+    }
+
+    return "";
+}
+
+// Upload to the scholar's own private folder.
+async function uploadRequirement(file, scholarshipId) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const uniqueName = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+    const filePath = `${currentUser.id}/${scholarshipId}/${uniqueName}`;
+
+    const { error } = await db.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type
+        });
 
     if (error) {
-        showMessage("scholarshipMessage", error.message, "error");
-        return;
+        throw new Error(`File upload failed: ${error.message}`);
     }
 
-    showMessage("scholarshipMessage", "Scholarship deleted.", "success");
-    await refreshAll();
+    return filePath;
 }
 
 async function loadSubmissions() {
@@ -454,6 +444,7 @@ async function loadSubmissions() {
             semester,
             academic_year,
             grade,
+            file_url,
             status,
             renewal_decision,
             verification_notes,
@@ -495,56 +486,58 @@ function renderSubmissions() {
             item.semester,
             item.academic_year,
             item.status
-        ].some((value) => String(value || "").toLowerCase().includes(search));
+        ].some((value) =>
+            String(value || "").toLowerCase().includes(search)
+        );
 
-        const matchesStatus = !statusFilter || item.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
+        return matchesSearch && (!statusFilter || item.status === statusFilter);
     });
 
-    if (filtered.length === 0) {
+    if (!filtered.length) {
         $("semesterTable").innerHTML =
             `<tr><td colspan="8">No semester submissions found.</td></tr>`;
         return;
     }
 
     $("semesterTable").innerHTML = filtered.map((item) => {
-        let actions = "View only";
+        const buttons = [];
+
+        if (item.file_url) {
+            buttons.push(`
+                <button class="action-button edit-button"
+                    data-action="view-requirement"
+                    data-id="${escapeHTML(item.id)}">View Requirement</button>
+            `);
+        }
 
         if (isStaff()) {
             const status = String(item.status || "Pending").toLowerCase();
             const renewal = String(item.renewal_decision || "Pending").toLowerCase();
 
-            const buttons = [];
-
-            // Show verification buttons only while submission is pending.
             if (status === "pending") {
                 buttons.push(`
                     <button class="action-button verify-button"
                         data-action="verify-submission"
-                        data-id="${item.id}">Verify</button>
+                        data-id="${escapeHTML(item.id)}">Verify</button>
                     <button class="action-button reject-button"
                         data-action="reject-submission"
-                        data-id="${item.id}">Reject</button>
+                        data-id="${escapeHTML(item.id)}">Reject</button>
                 `);
             }
 
-            // Renewal can be reviewed only after the submission is verified.
             if (status === "verified" && renewal === "pending") {
                 buttons.push(`
                     <button class="action-button edit-button"
                         data-action="approve-renewal"
-                        data-id="${item.id}">Approve Renewal</button>
+                        data-id="${escapeHTML(item.id)}">Approve Renewal</button>
                     <button class="action-button delete-button"
                         data-action="reject-renewal"
-                        data-id="${item.id}">Reject Renewal</button>
+                        data-id="${escapeHTML(item.id)}">Reject Renewal</button>
                 `);
             }
-
-            actions = buttons.length > 0
-                ? buttons.join("")
-                : "No actions available";
         }
+
+        const actions = buttons.length ? buttons.join("") : "View only";
 
         return `
             <tr>
@@ -556,14 +549,21 @@ function renderSubmissions() {
                 <td>${statusBadge(item.status)}</td>
                 <td>${statusBadge(item.renewal_decision)}</td>
                 <td>${actions}</td>
-            </tr>`;
+            </tr>
+        `;
     }).join("");
 }
 
 async function saveSubmission(event) {
     event.preventDefault();
 
+    if (!currentUser) {
+        showMessage("submissionFormMessage", "Please sign in first.", "error");
+        return;
+    }
+
     const scholarshipId = $("submissionScholarship").value;
+    const file = $("requirementFile").files[0];
 
     if (!scholarshipId) {
         showMessage("submissionFormMessage", "Please select a scholarship.", "error");
@@ -583,40 +583,131 @@ async function saveSubmission(event) {
         return;
     }
 
-    const record = {
-        scholarship_id: Number(scholarshipId),
-        semester: $("semester").value,
-        academic_year: $("academicYear").value.trim(),
-        grade: Number($("grade").value),
-        status: "Pending",
-        renewal_decision: "Pending"
-    };
-
-    showMessage("submissionFormMessage", "Submitting...");
-
-    const { error } = await db
-        .from("semester_submissions")
-        .insert(record);
-
-    if (error) {
-        showMessage("submissionFormMessage", error.message, "error");
+    if (isStaff()) {
+        showMessage(
+            "submissionFormMessage",
+            "This submission form is for Scholar accounts. Please sign in as a Scholar to upload requirements.",
+            "error"
+        );
         return;
     }
 
-    $("submissionForm").reset();
+    const fileError = validateRequirementFile(file);
+
+    if (fileError) {
+        showMessage("submissionFormMessage", fileError, "error");
+        return;
+    }
+
+    const semester = $("semester").value;
+    const academicYear = $("academicYear").value.trim();
+    const grade = Number($("grade").value);
+    const submitButton = $("submissionForm").querySelector('button[type="submit"]');
+
+    if (!semester || !academicYear || !Number.isFinite(grade) || grade < 1 || grade > 5) {
+        showMessage(
+            "submissionFormMessage",
+            "Please check the semester, academic year, and grade.",
+            "error"
+        );
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Uploading...";
+
+    let filePath;
+
+    try {
+        showMessage("submissionFormMessage", "Uploading your requirement...");
+
+        filePath = await uploadRequirement(file, scholarshipId);
+
+        showMessage("submissionFormMessage", "Saving submission...");
+
+        const record = {
+            scholarship_id: Number(scholarshipId),
+            semester,
+            academic_year: academicYear,
+            grade,
+            file_url: filePath,
+            status: "Pending",
+            renewal_decision: "Pending"
+        };
+
+        const { error } = await db
+            .from("semester_submissions")
+            .insert(record);
+
+        if (error) {
+            throw new Error(
+                `The file uploaded, but the submission could not be saved: ${error.message}. The uploaded file may need to be removed from Storage.`
+            );
+        }
+
+        $("submissionForm").reset();
+
+        showMessage(
+            "submissionFormMessage",
+            "Submission and requirement uploaded successfully!",
+            "success"
+        );
+
+        await loadSubmissions();
+    } catch (error) {
+        console.error("Submission error:", error);
+
+        showMessage(
+            "submissionFormMessage",
+            error.message || "Something went wrong while submitting.",
+            "error"
+        );
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Record";
+    }
+}
+
+// Generate a short-lived link to the private document.
+async function viewRequirement(submissionId) {
+    const item = submissions.find(
+        (submission) => String(submission.id) === String(submissionId)
+    );
+
+    if (!item || !item.file_url) {
+        showMessage("submissionMessage", "Requirement file not found.", "error");
+        return;
+    }
+
+    showMessage("submissionMessage", "Preparing secure file link...");
+
+    const { data, error } = await db.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(item.file_url, 60);
+
+    if (error) {
+        console.error("Could not open requirement:", error);
+
+        showMessage(
+            "submissionMessage",
+            `Could not open the file: ${error.message}. Check your Storage policies.`,
+            "error"
+        );
+        return;
+    }
 
     showMessage(
-        "submissionFormMessage",
-        "Semester submission added successfully.",
+        "submissionMessage",
+        "Secure link created. It expires in 60 seconds.",
         "success"
     );
 
-    await loadSubmissions();
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
 }
 
 async function updateSubmission(id, updates, successMessage) {
     if (!isStaff()) {
-        showMessage("submissionMessage", "Only staff and admins can review submissions.", "error");
+        showMessage("submissionMessage", "Only Staff can review submissions.", "error");
         return;
     }
 
@@ -629,8 +720,10 @@ async function updateSubmission(id, updates, successMessage) {
         return;
     }
 
-    // Prevent repeating actions after a decision has been made.
-    if (updates.status && String(submission.status).toLowerCase() !== "pending") {
+    if (
+        updates.status &&
+        String(submission.status).toLowerCase() !== "pending"
+    ) {
         showMessage("submissionMessage", "This submission has already been reviewed.", "error");
         return;
     }
@@ -687,6 +780,8 @@ function bindEvents() {
     $("submissionStatusFilter").addEventListener("change", renderSubmissions);
 
     $("toggleScholarshipForm").addEventListener("click", () => {
+        if (!isStaff()) return;
+
         if ($("scholarshipFormContainer").classList.contains("hidden")) {
             openScholarshipForm();
         } else {
@@ -707,14 +802,13 @@ function bindEvents() {
         if (!button) return;
 
         const id = button.dataset.id;
-        const action = button.dataset.action;
         const item = scholarships.find(
             (scholarship) => String(scholarship.id) === id
         );
 
-        if (action === "edit-scholarship" && item) {
+        if (button.dataset.action === "edit-scholarship" && item) {
             openScholarshipForm(item);
-        } else if (action === "delete-scholarship") {
+        } else if (button.dataset.action === "delete-scholarship") {
             await deleteScholarship(id);
         }
     });
@@ -726,7 +820,9 @@ function bindEvents() {
         const id = button.dataset.id;
         const action = button.dataset.action;
 
-        if (action === "verify-submission") {
+        if (action === "view-requirement") {
+            await viewRequirement(id);
+        } else if (action === "verify-submission") {
             await updateSubmission(
                 id,
                 {
@@ -776,10 +872,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     await checkSession();
 });
 
-db.auth.onAuthStateChange((event, session) => {
+db.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT") {
         currentUser = null;
         currentRole = "student";
+        scholarships = [];
+        submissions = [];
         showLogin();
     }
 });
